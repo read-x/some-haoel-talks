@@ -28,7 +28,7 @@ Go语言的类型检查有两种技术，一种是 Type Assert，一种是Reflec
 
 在下面的示例中，我们有一个通用类型的容器，可以进行 `Put(val)` 和 `Get()`，注意，这里使用了 `interface{}` 做泛型。
 
-```
+```go
 //Container is a generic container, accepting anything.
 type Container []interface{}
 
@@ -47,7 +47,7 @@ func (c *Container) Get() interface{} {
 
 我们可以这样使用：
 
-```
+```go
 intContainer := &Container{}
 intContainer.Put(7)
 intContainer.Put(42)
@@ -58,7 +58,7 @@ intContainer.Put(42)
 
 下面是一个Type Assert的示例：
 
-```
+```go
 // assert that the actual type is int
 elem, ok := intContainer.Get().(int)
 if !ok {
@@ -73,7 +73,7 @@ fmt.Printf("assertExample: %d (%T)\n", elem, elem)
 
 对于Reflection，我们需要把上面的代码修改如下：
 
-```
+```go
 type Container struct {
     s reflect.Value
 }
@@ -112,7 +112,7 @@ func (c *Container) Get(refval interface{}) error {
 
 于是，在使用这段代码的时候，会是下面这个样子：
 
-```
+```go
 f1 := 3.1415926
 f2 := 1.41421356237
 
@@ -141,7 +141,7 @@ fmt.Println(c.s.Index(0)) //1.4142135623
 
 对于泛型编程最牛的语言 C++ 来说，这类问题都是使用 Template解决的。
 
-```
+```go
 //用<class T>来描述泛型
 template <class T>
 T GetMax (T a, T b)  {
@@ -152,7 +152,7 @@ T GetMax (T a, T b)  {
 
 ```
 
-```
+```go
 int i=5, j=6, k;
 //生成int类型的函数
 k=GetMax<int>(i,j);
@@ -181,7 +181,7 @@ C++的编译器会在编译时分析代码，根据不同的变量类型来自�
 
 我们把之前的示例改成模板，取名为 `container.tmp.go` 放在 `./template/` 下：
 
-```
+```go
 package PACKAGE_NAME
 type GENERIC_NAMEContainer struct {
     s []GENERIC_TYPE
@@ -212,7 +212,7 @@ func (c *GENERIC_NAMEContainer) Get() GENERIC_TYPE {
 
 然后，我们有一个叫 `gen.sh` 的生成脚本，如下所示：
 
-```
+```bash
 #!/bin/bash
 
 set -e
@@ -245,7 +245,7 @@ sed 's/PACKAGE_NAME/'"${PACKAGE}"'/g' ${SRC_FILE} | \
 
 接下来，我们只需要在代码中打一个特殊的注释：
 
-```
+```go
 //go:generate ./gen.sh ./template/container.tmp.go gen uint32 container
 func generateUint32Example() {
     var u uint32 = 42
@@ -275,7 +275,7 @@ func generateStringExample() {
 
 一份文件名为uint32\_container.go：
 
-```
+```go
 package gen
 
 type Uint32Container struct {
@@ -297,7 +297,7 @@ func (c *Uint32Container) Get() uint32 {
 
 另一份的文件名为 string\_container.go：
 
-```
+```go
 package gen
 
 type StringContainer struct {
@@ -325,7 +325,7 @@ func (c *StringContainer) Get() string {
 
 下面是一个Fitler的模板文件 `filter.tmp.go`：
 
-```
+```go
 package PACKAGE_NAME
 
 type GENERIC_NAMEList []GENERIC_TYPE
@@ -346,7 +346,7 @@ func (al GENERIC_NAMEList) Filter(f GENERIC_NAMEToBool) GENERIC_NAMEList {
 
 这样，我们可以在需要使用这个的地方，加上相关的 Go Generate 的注释：
 
-```
+```go
 type Employee struct {
   Name     string
   Age      int

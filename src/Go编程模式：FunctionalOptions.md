@@ -10,7 +10,7 @@
 
 在编程中，我们经常需要对一个对象（或是业务实体）进行相关的配置。比如下面这个业务实体（注意，这只是一个示例）：
 
-```
+```go
 type Server struct {
     Addr     string
     Port     int
@@ -30,7 +30,7 @@ type Server struct {
 
 所以，针对这样的配置，我们需要有多种不同的创建不同配置 `Server` 的函数签名，如下所示：
 
-```
+```go
 func NewDefaultServer(addr string, port int) (*Server, error) {
   return &Server{addr, port, "tcp", 30 * time.Second, 100, nil}, nil
 }
@@ -55,7 +55,7 @@ func NewTLSServerWithMaxConnAndTimeout(addr string, port int, maxconns int, time
 
 要解决这个问题，最常见的方式是使用一个配置对象，如下所示：
 
-```
+```go
 type Config struct {
     Protocol string
     Timeout  time.Duration
@@ -67,7 +67,7 @@ type Config struct {
 
 我们把那些非必输的选项都移到一个结构体里，这样一来， `Server` 对象就会变成：
 
-```
+```go
 type Server struct {
     Addr string
     Port int
@@ -78,7 +78,7 @@ type Server struct {
 
 于是，我们就只需要一个 `NewServer()` 的函数了，在使用前需要构造 `Config` 对象。
 
-```
+```go
 func NewServer(addr string, port int, conf *Config) (*Server, error) {
     //...
 }
@@ -97,7 +97,7 @@ srv2, _ := NewServer("locahost", 9000, &conf)
 
 如果你是一个Java程序员，熟悉设计模式的一定会很自然地使用Builder模式。比如下面的代码：
 
-```
+```go
 User user = new User.Builder()
   .name("Hao Chen")
   .email("haoel@hotmail.com")
@@ -108,7 +108,7 @@ User user = new User.Builder()
 
 仿照这个模式，我们可以把刚刚的代码改写成下面的样子（注：下面的代码没有考虑出错处理，其中关于出错处理的更多内容，你可以再回顾下 [上节课](https://time.geekbang.org/column/article/332602)）：
 
-```
+```go
 //使用一个builder类来做包装
 type ServerBuilder struct {
   Server
@@ -149,7 +149,7 @@ func (sb *ServerBuilder) Build() (Server) {
 
 这样一来，就可以使用这样的方式了：
 
-```
+```go
 sb := ServerBuilder{}
 server, err := sb.Create("127.0.0.1", 8080).
   WithProtocol("udp").
@@ -167,14 +167,14 @@ server, err := sb.Create("127.0.0.1", 8080).
 
 首先，我们定义一个函数类型：
 
-```
+```go
 type Option func(*Server)
 
 ```
 
 然后，我们可以使用函数式的方式定义一组如下的函数：
 
-```
+```go
 func Protocol(p string) Option {
     return func(s *Server) {
         s.Protocol = p
@@ -204,7 +204,7 @@ func TLS(tls *tls.Config) Option {
 
 好了，现在我们再定一个 `NewServer()` 的函数，其中，有一个可变参数 `options` ，它可以传出多个上面的函数，然后使用一个for-loop来设置我们的 `Server` 对象。
 
-```
+```go
 func NewServer(addr string, port int, options ...func(*Server)) (*Server, error) {
 
   srv := Server{
@@ -226,7 +226,7 @@ func NewServer(addr string, port int, options ...func(*Server)) (*Server, error)
 
 于是，我们在创建 `Server` 对象的时候，就可以像下面这样：
 
-```
+```go
 s1, _ := NewServer("localhost", 1024)
 s2, _ := NewServer("localhost", 2048, Protocol("udp"))
 s3, _ := NewServer("0.0.0.0", 8080, Timeout(300*time.Second), MaxConns(1000))

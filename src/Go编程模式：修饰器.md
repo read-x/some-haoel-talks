@@ -16,7 +16,7 @@
 
 我们先来看一个示例：
 
-```
+```go
 package main
 
 import "fmt"
@@ -44,15 +44,14 @@ func main() {
 
 这个玩法和 Python 的异曲同工，只不过，有些遗憾的是，Go 并不支持像 Python 那样的 `@decorator` 语法糖。所以，在调用上有些难看。当然，如果你想让代码更容易读，你可以这样写：
 
-```
+```go
 hello := decorator(Hello)
 hello("Hello")
 
 ```
 
 我们再来看一个计算运行时间的例子：
-
-```
+```go
 package main
 
 import (
@@ -117,7 +116,7 @@ func main() {
 
 运行后输出：
 
-```
+```bash
 $ go run time.sum.go
 --- Time Elapsed (main.Sum1): 3.557469ms ---
 --- Time Elapsed (main.Sum2): 291ns ---
@@ -131,7 +130,7 @@ $ go run time.sum.go
 
 先看一个简单的 HTTP Server 的代码：
 
-```
+```go
 package main
 
 import (
@@ -168,7 +167,7 @@ func main() {
 
 所以，这样的函数我们可以写出好多。如下所示，有写 HTTP 响应头的，有写认证 Cookie 的，有检查认证Cookie的，有打日志的……
 
-```
+```go
 package main
 
 import (
@@ -245,7 +244,7 @@ func main() {
 
 重构时，我们需要先写一个工具函数，用来遍历并调用各个修饰器：
 
-```
+```go
 type HttpHandlerDecorator func(http.HandlerFunc) http.HandlerFunc
 
 func Handler(h http.HandlerFunc, decors ...HttpHandlerDecorator) http.HandlerFunc {
@@ -260,7 +259,7 @@ func Handler(h http.HandlerFunc, decors ...HttpHandlerDecorator) http.HandlerFun
 
 然后，我们就可以像下面这样使用了：
 
-```
+```go
 http.HandleFunc("/v4/hello", Handler(hello,
                 WithServerHeader, WithBasicAuth, WithDebugLog))
 
@@ -276,7 +275,7 @@ http.HandleFunc("/v4/hello", Handler(hello,
 
 废话不说，下面是我用 Reflection 机制写的一个比较通用的修饰器（为了便于阅读，我删除了出错判断代码）：
 
-```
+```go
 func Decorator(decoPtr, fn interface{}) (err error) {
     var decoratedFunc, targetFunc reflect.Value
 
@@ -308,7 +307,7 @@ func Decorator(decoPtr, fn interface{}) (err error) {
 
 好了，让我们来看一下使用效果。首先，假设我们有两个需要修饰的函数：
 
-```
+```go
 func foo(a, b, c int) int {
     fmt.Printf("%d, %d, %d \n", a, b, c)
     return a + b + c
@@ -323,7 +322,7 @@ func bar(a, b string) string {
 
 然后，我们可以这样做：
 
-```
+```go
 type MyFoo func(int, int, int) int
 var myfoo MyFoo
 Decorator(&myfoo, foo)
@@ -335,7 +334,7 @@ myfoo(1, 2, 3)
 
 如果你不想声明函数签名，就可以这样：
 
-```
+```go
 mybar := bar
 Decorator(&mybar, bar)
 mybar("hello,", "world!")

@@ -1,21 +1,21 @@
-#  | Go编程模式：Map-Reduce
+# | Go 编程模式：Map-Reduce
 
 你好，我是陈皓，网名左耳朵耗子。
 
-这节课，我们来学习一下函数式编程中非常重要的Map、Reduce、Filter这三种操作。这三种操作可以让我们轻松灵活地进行一些数据处理，毕竟，我们的程序大多数情况下都在倒腾数据。尤其是对于一些需要统计的业务场景来说，Map、Reduce、Filter是非常通用的玩法。
+这节课，我们来学习一下函数式编程中非常重要的 Map、Reduce、Filter 这三种操作。这三种操作可以让我们轻松灵活地进行一些数据处理，毕竟，我们的程序大多数情况下都在倒腾数据。尤其是对于一些需要统计的业务场景来说，Map、Reduce、Filter 是非常通用的玩法。
 
 话不多说，我们先来看几个例子。
 
 ## 基本示例
 
-### Map示例
+### Map 示例
 
-在下面的程序代码中，我写了两个Map函数，这两个函数需要两个参数：
+在下面的程序代码中，我写了两个 Map 函数，这两个函数需要两个参数：
 
 - 一个是字符串数组 `[]` `string`，说明需要处理的数据是一个字符串；
-- 另一个是一个函数func(s string) string 或 func(s string) int。
+- 另一个是一个函数 func(s string) string 或 func(s string) int。
 
-```
+```go
 func MapStrToStr(arr []string, fn func(s string) string) []string {
     var newArray = []string{}
     for _, it := range arr {
@@ -34,11 +34,11 @@ func MapStrToInt(arr []string, fn func(s string) int) []int {
 
 ```
 
-整个Map函数的运行逻辑都很相似，函数体都是在遍历第一个参数的数组，然后，调用第二个参数的函数，把它的值组合成另一个数组返回。
+整个 Map 函数的运行逻辑都很相似，函数体都是在遍历第一个参数的数组，然后，调用第二个参数的函数，把它的值组合成另一个数组返回。
 
 因此，我们就可以这样使用这两个函数：
 
-```
+```go
 var list = []string{"Hao", "Chen", "MegaEase"}
 
 x := MapStrToStr(list, func(s string) string {
@@ -57,11 +57,11 @@ fmt.Printf("%v\n", y)
 
 可以看到，我们给第一个 `MapStrToStr()` 传了功能为“转大写”的函数，于是出来的数组就成了全大写的，给 `MapStrToInt()` 传的是计算长度，所以出来的数组是每个字符串的长度。
 
-我们再来看一下Reduce和Filter的函数是什么样的。
+我们再来看一下 Reduce 和 Filter 的函数是什么样的。
 
 ### Reduce 示例
 
-```
+```go
 func Reduce(arr []string, fn func(s string) int) int {
     sum := 0
     for _, it := range arr {
@@ -80,9 +80,9 @@ fmt.Printf("%v\n", x)
 
 ```
 
-### Filter示例
+### Filter 示例
 
-```
+```go
 func Filter(arr []int, fn func(n int) bool) []int {
     var newArray = []int{}
     for _, it := range arr {
@@ -106,13 +106,13 @@ fmt.Printf("%v\n", out)
 
 ```
 
-为了方便你理解呢，我给你展示一张图，它形象地说明了Map-Reduce的业务语义，在数据处理中非常有用。
+为了方便你理解呢，我给你展示一张图，它形象地说明了 Map-Reduce 的业务语义，在数据处理中非常有用。
 
 ![](images/332606/1506b63044071bfa5c214a725a9caf56.png)
 
 ## 业务示例
 
-通过刚刚的一些示例，你现在应该有点明白了，Map、Reduce、Filter只是一种控制逻辑，真正的业务逻辑是以传给它们的数据和函数来定义的。
+通过刚刚的一些示例，你现在应该有点明白了，Map、Reduce、Filter 只是一种控制逻辑，真正的业务逻辑是以传给它们的数据和函数来定义的。
 
 是的，这是一个很经典的“业务逻辑”和“控制逻辑”分离解耦的编程模式。
 
@@ -122,7 +122,7 @@ fmt.Printf("%v\n", out)
 
 首先，我们有一个员工对象和一些数据：
 
-```
+```go
 type Employee struct {
     Name     string
     Age      int
@@ -142,11 +142,11 @@ var list = []Employee{
 
 ```
 
-### 相关的Reduce、Fitler函数
+### 相关的 Reduce、Fitler 函数
 
 然后，我们有下面的几个函数：
 
-```
+```go
 func EmployeeCountIf(list []Employee, fn func(e *Employee) bool) int {
     count := 0
     for i, _ := range list {
@@ -179,16 +179,16 @@ func EmployeeSumIf(list []Employee, fn func(e *Employee) int) int {
 
 简单说明一下：
 
-- `EmployeeConutIf` 和 `EmployeeSumIf` 分别用于统计满足某个条件的个数或总数。它们都是Filter + Reduce的语义。
-- `EmployeeFilterIn` 就是按某种条件过滤，就是Fitler的语义。
+- `EmployeeConutIf` 和 `EmployeeSumIf` 分别用于统计满足某个条件的个数或总数。它们都是 Filter + Reduce 的语义。
+- `EmployeeFilterIn` 就是按某种条件过滤，就是 Fitler 的语义。
 
 ### 各种自定义的统计示例
 
 于是，我们就可以有接下来的代码了。
 
-**1.统计有多少员工大于40岁**
+**1.统计有多少员工大于 40 岁**
 
-```
+```go
 old := EmployeeCountIf(list, func(e *Employee) bool {
     return e.Age > 40
 })
@@ -197,9 +197,9 @@ fmt.Printf("old people: %d\n", old)
 
 ```
 
-**2.统计有多少员工的薪水大于6000**
+**2.统计有多少员工的薪水大于 6000**
 
-```
+```go
 high_pay := EmployeeCountIf(list, func(e *Employee) bool {
     return e.Salary > 6000
 })
@@ -210,7 +210,7 @@ fmt.Printf("High Salary people: %d\n", high_pay)
 
 **3.列出有没有休假的员工**
 
-```
+```go
 no_vacation := EmployeeFilterIn(list, func(e *Employee) bool {
     return e.Vacation == 0
 })
@@ -221,7 +221,7 @@ fmt.Printf("People no vacation: %v\n", no_vacation)
 
 **4.统计所有员工的薪资总和**
 
-```
+```go
 total_pay := EmployeeSumIf(list, func(e *Employee) int {
     return e.Salary
 })
@@ -231,9 +231,9 @@ fmt.Printf("Total Salary: %d\n", total_pay)
 
 ```
 
-**5.统计30岁以下员工的薪资总和**
+**5.统计 30 岁以下员工的薪资总和**
 
-```
+```go
 younger_pay := EmployeeSumIf(list, func(e *Employee) int {
     if e.Age < 30 {
         return e.Salary
@@ -243,17 +243,17 @@ younger_pay := EmployeeSumIf(list, func(e *Employee) int {
 
 ```
 
-## 泛型Map-Reduce
+## 泛型 Map-Reduce
 
-刚刚的Map-Reduce都因为要处理数据的类型不同，而需要写出不同版本的Map-Reduce，虽然它们的代码看上去是很类似的。所以，这里就要提到泛型编程了。
+刚刚的 Map-Reduce 都因为要处理数据的类型不同，而需要写出不同版本的 Map-Reduce，虽然它们的代码看上去是很类似的。所以，这里就要提到泛型编程了。
 
 ### 简单版 Generic Map
 
-我在写这节课的时候，Go语言还不支持泛型（注：Go开发团队技术负责人Russ Cox在2012年11月21golang-dev上的mail确认了Go泛型将在Go 1.18版本落地，时间是2022年2月）。所以，目前的Go语言的泛型只能用 `interface{}` \+ `reflect` 来完成。 `interface{}` 可以理解为C中的 `void*`、Java中的 `Object` ， `reflect` 是Go的反射机制包，作用是在运行时检查类型。
+我在写这节课的时候，Go 语言还不支持泛型（注：Go 开发团队技术负责人 Russ Cox 在 2012 年 11 月 21golang-dev 上的 mail 确认了 Go 泛型将在 Go 1.18 版本落地，时间是 2022 年 2 月）。所以，目前的 Go 语言的泛型只能用 `interface{}` \+ `reflect` 来完成。 `interface{}` 可以理解为 C 中的 `void*`、Java 中的 `Object` ， `reflect` 是 Go 的反射机制包，作用是在运行时检查类型。
 
-下面，我们来看一下，一个非常简单的、不做任何类型检查的泛型的Map函数怎么写。
+下面，我们来看一下，一个非常简单的、不做任何类型检查的泛型的 Map 函数怎么写。
 
-```
+```go
 func Map(data interface{}, fn interface{}) []interface{} {
     vfn := reflect.ValueOf(fn)
     vdata := reflect.ValueOf(data)
@@ -272,11 +272,11 @@ func Map(data interface{}, fn interface{}) []interface{} {
 - 首先，我们通过 `reflect.ValueOf()` 获得 `interface{}` 的值，其中一个是数据 `vdata`，另一个是函数 `vfn`。
 - 然后，通过 `vfn.Call()` 方法调用函数，通过 `[]refelct.Value{vdata.Index(i)}` 获得数据。
 
-Go语言中的反射的语法有点令人费解，不过，简单看一下手册，还是能够读懂的。反射不是这节课的重点，我就不讲了。如果你还不太懂这些基础知识，课下可以学习下相关的教程。
+Go 语言中的反射的语法有点令人费解，不过，简单看一下手册，还是能够读懂的。反射不是这节课的重点，我就不讲了。如果你还不太懂这些基础知识，课下可以学习下相关的教程。
 
 于是，我们就可以有下面的代码——不同类型的数据可以使用相同逻辑的 `Map()` 代码。
 
-```
+```go
 square := func(x int) int {
   return x * x
 }
@@ -298,15 +298,15 @@ fmt.Println(upstrs)
 
 但是，因为反射是运行时的事，所以，如果类型出问题的话，就会有运行时的错误。比如：
 
-```
+```go
 x := Map(5, 5)
 fmt.Println(x)
 
 ```
 
-代码可以很轻松地编译通过，但是在运行时却出问题了，而且还是panic错误……
+代码可以很轻松地编译通过，但是在运行时却出问题了，而且还是 panic 错误……
 
-```
+```bash
 panic: reflect: call of reflect.Value.Len on int Value
 
 goroutine 1 [running]:
@@ -320,11 +320,11 @@ exit status 2
 
 ```
 
-### 健壮版的Generic Map
+### 健壮版的 Generic Map
 
-所以，如果要写一个健壮的程序，对于这种用 `interface{}` 的“过度泛型”，就需要我们自己来做类型检查。来看一个有类型检查的Map代码：
+所以，如果要写一个健壮的程序，对于这种用 `interface{}` 的“过度泛型”，就需要我们自己来做类型检查。来看一个有类型检查的 Map 代码：
 
-```
+```go
 func Transform(slice, function interface{}) interface{} {
   return transform(slice, function, false)
 }
@@ -386,21 +386,21 @@ func verifyFuncSignature(fn reflect.Value, types ...reflect.Type) bool {
 
 ```
 
-代码一下子就复杂起来了，可见，复杂的代码都是在处理异常的地方。我不打算Walk through 所有的代码，别看代码多，还是可以读懂的。
+代码一下子就复杂起来了，可见，复杂的代码都是在处理异常的地方。我不打算 Walk through 所有的代码，别看代码多，还是可以读懂的。
 
 我来列一下代码中的几个要点。
 
-1. 代码中没有使用Map函数，因为和数据结构有含义冲突的问题，所以使用 `Transform`，这个来源于 C++ STL库中的命名。
+1. 代码中没有使用 Map 函数，因为和数据结构有含义冲突的问题，所以使用 `Transform`，这个来源于 C++ STL 库中的命名。
 2. 有两个版本的函数，一个是返回一个全新的数组 `Transform()`，一个是“就地完成” `TransformInPlace()`。
-3. 在主函数中，用 `Kind()` 方法检查了数据类型是不是 Slice，函数类型是不是Func。
+3. 在主函数中，用 `Kind()` 方法检查了数据类型是不是 Slice，函数类型是不是 Func。
 4. 检查函数的参数和返回类型是通过 `verifyFuncSignature()` 来完成的： `NumIn()` 用来检查函数的“入参”； `NumOut()` ：用来检查函数的“返回值”。
-5. 如果需要新生成一个Slice，会使用 `reflect.MakeSlice()` 来完成。
+5. 如果需要新生成一个 Slice，会使用 `reflect.MakeSlice()` 来完成。
 
 好了，有了这段代码，我们的代码就很可以很开心地使用了：
 
 1.可以用于字符串数组：
 
-```
+```go
 list := []string{"1", "2", "3", "4", "5", "6"}
 result := Transform(list, func(a string) string{
     return a +a +a
@@ -411,7 +411,7 @@ result := Transform(list, func(a string) string{
 
 2.可以用于整形数组：
 
-```
+```go
 list := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 TransformInPlace(list, func (a int) int {
   return a*3
@@ -422,7 +422,7 @@ TransformInPlace(list, func (a int) int {
 
 3.可以用于结构体：
 
-```
+```go
 var list = []Employee{
     {"Hao", 44, 0, 8000},
     {"Bob", 34, 10, 5000},
@@ -443,7 +443,7 @@ result := TransformInPlace(list, func(e Employee) Employee {
 
 同样，泛型版的 Reduce 代码如下：
 
-```
+```go
 func Reduce(slice, pairFunc, zero interface{}) interface{} {
   sliceInType := reflect.ValueOf(slice)
   if sliceInType.Kind() != reflect.Slice {
@@ -483,7 +483,7 @@ func Reduce(slice, pairFunc, zero interface{}) interface{} {
 
 同样，泛型版的 Filter 代码如下（同样分是否“就地计算”的两个版本）：
 
-```
+```go
 func Filter(slice, function interface{}) interface{} {
   result, _ := filter(slice, function, false)
   return result
@@ -540,10 +540,10 @@ func filter(slice, function interface{}, inPlace bool) (interface{}, int) {
 最后，还有几个未尽事宜：
 
 1. 使用反射来做这些东西会有一个问题， **那就是代码的性能会很差。所以，上面的代码不能用在需要高性能的地方**。怎么解决这个问题，我会在下节课给你介绍下。
-2. 这节课中的代码大量地参考了 Rob Pike的版本，你可以点击这个链接查看： [https://github.com/robpike/filter](https://github.com/robpike/filter)。
-3. 其实，在全世界范围内，有大量的程序员都在问Go语言官方什么时候在标准库中支持 Map、Reduce。Rob Pike说，这种东西难写吗？还要我们官方来帮你们写吗？这种代码我多少年前就写过了，但是，我一次都没有用过，我还是喜欢用“For循环”，我觉得你最好也跟我一起用 “For循环”。
+2. 这节课中的代码大量地参考了 Rob Pike 的版本，你可以点击这个链接查看： [https://github.com/robpike/filter](https://github.com/robpike/filter)。
+3. 其实，在全世界范围内，有大量的程序员都在问 Go 语言官方什么时候在标准库中支持 Map、Reduce。Rob Pike 说，这种东西难写吗？还要我们官方来帮你们写吗？这种代码我多少年前就写过了，但是，我一次都没有用过，我还是喜欢用“For 循环”，我觉得你最好也跟我一起用 “For 循环”。
 
-我个人觉得，Map、Reduce在数据处理的时候还是很有用的，Rob Pike可能平时也不怎么写“业务逻辑”的代码，所以，他可能也不太了解业务的变化有多么频繁……
+我个人觉得，Map、Reduce 在数据处理的时候还是很有用的，Rob Pike 可能平时也不怎么写“业务逻辑”的代码，所以，他可能也不太了解业务的变化有多么频繁……
 
 当然，好还是不好，由你来判断，但多学一些编程模式，一定是对自己很有帮助的。
 

@@ -1,12 +1,12 @@
-#  | Go编程模式：错误处理
+# | Go 编程模式：错误处理
 
 你好，我是陈皓，网名左耳朵耗子。
 
-错误处理一直是编程必须要面对的问题。错误处理如果做得好的话，代码的稳定性会很好。不同的语言有不同的错误处理的方式。Go语言也一样，这节课，我们来讨论一下Go语言的错误出处，尤其是那令人抓狂的 `if err != nil` 。
+错误处理一直是编程必须要面对的问题。错误处理如果做得好的话，代码的稳定性会很好。不同的语言有不同的错误处理的方式。Go 语言也一样，这节课，我们来讨论一下 Go 语言的错误出处，尤其是那令人抓狂的 `if err != nil` 。
 
-在正式讨论“Go代码里满屏的 `if err != nil` 怎么办”这件事儿之前，我想先说一说编程中的错误处理。
+在正式讨论“Go 代码里满屏的 `if err != nil` 怎么办”这件事儿之前，我想先说一说编程中的错误处理。
 
-## C语言的错误检查
+## C 语言的错误检查
 
 首先，我们知道，处理错误最直接的方式是通过错误码，这也是传统的方式，在过程式语言中通常都是用这样的方式处理错误的。比如 C 语言，基本上来说，其通过函数的返回值标识是否有错，然后通过全局的 `errno` 变量加一个 `errstr` 的数组来告诉你为什么出错。
 
@@ -26,9 +26,9 @@ int atoi(const char *str)
 
 > _7.20.1The functions atof, atoi, atol, and atoll need not affect the value of the integer expression errno on an error. If the value of the result cannot be represented, the behavior is undeﬁned._
 
-像 `atoi()`、 `atof()`、 `atol()` 或 `atoll()` 这样的函数，是不会设置 `errno` 的，而且，如果结果无法计算的话，行为是undefined。所以，后来，libc 又给出了一个新的函数 `strtol()`，这个函数在出错的时候会设置全局变量 `errno` ：
+像 `atoi()`、 `atof()`、 `atol()` 或 `atoll()` 这样的函数，是不会设置 `errno` 的，而且，如果结果无法计算的话，行为是 undefined。所以，后来，libc 又给出了一个新的函数 `strtol()`，这个函数在出错的时候会设置全局变量 `errno` ：
 
-```
+```java
 long val = strtol(in_str, &endptr, 10);  //10的意思是10进制
 
 //如果无法转换
@@ -62,9 +62,9 @@ if (errno != 0 && val == 0) {
 
 然而，这又使得函数接入中参数的语义变得很复杂，一些参数是入参，一些参数是出参，函数接口变得复杂了一些。而且，依然没有解决函数的成功或失败可以被人为忽略的问题。
 
-## Java的错误处理
+## Java 的错误处理
 
-Java语言使用 `try-catch-finally` 通过使用异常的方式来处理错误，其实，这比起C语言的错误处理进了一大步，使用抛异常和抓异常的方式可以让我们的代码有这样一些好处。
+Java 语言使用 `try-catch-finally` 通过使用异常的方式来处理错误，其实，这比起 C 语言的错误处理进了一大步，使用抛异常和抓异常的方式可以让我们的代码有这样一些好处。
 
 - 函数接口在 input（参数）和 output（返回值）以及错误处理的语义是比较清楚的。
 - 正常逻辑的代码可以跟错误处理和资源清理的代码分开，提高了代码的可读性。
@@ -72,13 +72,13 @@ Java语言使用 `try-catch-finally` 通过使用异常的方式来处理错误�
 - 在面向对象的语言中（如 Java），异常是个对象，所以，可以实现多态式的 catch。
 - 与状态返回码相比，异常捕捉有一个显著的好处，那就是函数可以嵌套调用，或是链式调用，比如：
 
-```
+```java
 int x = add(a, div(b,c));
 Pizza p = PizzaBuilder().SetSize(sz).SetPrice(p)...;
 
 ```
 
-## Go语言的错误处理
+## Go 语言的错误处理
 
 Go 语言的函数支持多返回值，所以，可以在返回接口把业务语义（业务返回值）和控制语义（出错返回值）区分开。Go 语言的很多函数都会返回 result、err 两个值，于是就有这样几点：
 
@@ -88,7 +88,7 @@ Go 语言的函数支持多返回值，所以，可以在返回接口把业务�
 
 另外，如果一个函数返回了多个不同类型的 `error`，你也可以使用下面这样的方式：
 
-```
+```go
 if err != nil {
   switch err.(type) {
     case *json.SyntaxError:
@@ -104,20 +104,20 @@ if err != nil {
 
 ```
 
-我们可以看到， **Go语言的错误处理的方式，本质上是返回值检查，但是它也兼顾了异常的一些好处——对错误的扩展**。
+我们可以看到， **Go 语言的错误处理的方式，本质上是返回值检查，但是它也兼顾了异常的一些好处——对错误的扩展**。
 
 ## 资源清理
 
 出错后是需要做资源清理的，不同的编程语言有不同的资源清理的编程模式。
 
-- C语言：使用的是 `goto fail;` 的方式到一个集中的地方进行清理（给你推荐一篇有意思的文章《 [由苹果的低级BUG想到的](https://coolshell.cn/articles/11112.html)》，你可以点击链接看一下）。
-- C++语言：一般来说使用 [RAII模式](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)，通过面向对象的代理模式，把需要清理的资源交给一个代理类，然后再析构函数来解决。
-- Java语言：可以在finally 语句块里进行清理。
-- Go语言：使用 `defer` 关键词进行清理。
+- C 语言：使用的是 `goto fail;` 的方式到一个集中的地方进行清理（给你推荐一篇有意思的文章《 [由苹果的低级 BUG 想到的](https://coolshell.cn/articles/11112.html)》，你可以点击链接看一下）。
+- C++语言：一般来说使用 [RAII 模式](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)，通过面向对象的代理模式，把需要清理的资源交给一个代理类，然后再析构函数来解决。
+- Java 语言：可以在 finally 语句块里进行清理。
+- Go 语言：使用 `defer` 关键词进行清理。
 
-下面是一个Go语言的资源清理的示例：
+下面是一个 Go 语言的资源清理的示例：
 
-```
+```go
 func Close(c io.Closer) {
   err := c.Close()
   if err != nil {
@@ -145,7 +145,7 @@ func main() {
 
 好了，说到 Go 语言的 `if err !=nil` 的代码了，这样的代码的确是能让人写到吐。那么有没有什么好的方式呢？有的。我们先看一个令人崩溃的代码。
 
-```
+```go
 func parse(r io.Reader) (*Point, error) {
 
     var p Point
@@ -171,7 +171,7 @@ func parse(r io.Reader) (*Point, error) {
 
 要解决这个事，我们可以用函数式编程的方式，如下代码示例：
 
-```
+```go
 func parse(r io.Reader) (*Point, error) {
     var p Point
     var err error
@@ -196,11 +196,11 @@ func parse(r io.Reader) (*Point, error) {
 
 ```
 
-从这段代码中，我们可以看到，我们通过使用Closure 的方式把相同的代码给抽出来重新定义一个函数，这样大量的 `if err!=nil` 处理得很干净了，但是会带来一个问题，那就是有一个 `err` 变量和一个内部的函数，感觉不是很干净。
+从这段代码中，我们可以看到，我们通过使用 Closure 的方式把相同的代码给抽出来重新定义一个函数，这样大量的 `if err!=nil` 处理得很干净了，但是会带来一个问题，那就是有一个 `err` 变量和一个内部的函数，感觉不是很干净。
 
-那么，我们还能不能搞得更干净一点呢？我们从Go 语言的 `bufio.Scanner()` 中似乎可以学习到一些东西：
+那么，我们还能不能搞得更干净一点呢？我们从 Go 语言的 `bufio.Scanner()` 中似乎可以学习到一些东西：
 
-```
+```go
 scanner := bufio.NewScanner(input)
 
 for scanner.Scan() {
@@ -214,11 +214,11 @@ if err := scanner.Err(); err != nil {
 
 ```
 
-可以看到， `scanner` 在操作底层的I/O的时候，那个for-loop中没有任何的 `if err !=nil` 的情况，退出循环后有一个 `scanner.Err()` 的检查，看来使用了结构体的方式。模仿它，就可以对我们的代码进行重构了。
+可以看到， `scanner` 在操作底层的 I/O 的时候，那个 for-loop 中没有任何的 `if err !=nil` 的情况，退出循环后有一个 `scanner.Err()` 的检查，看来使用了结构体的方式。模仿它，就可以对我们的代码进行重构了。
 
 首先，定义一个结构体和一个成员函数：
 
-```
+```go
 type Reader struct {
     r   io.Reader
     err error
@@ -234,7 +234,7 @@ func (r *Reader) read(data interface{}) {
 
 然后，我们的代码就可以变成下面这样：
 
-```
+```go
 func parse(input io.Reader) (*Point, error) {
     var p Point
     r := Reader{r: input}
@@ -256,7 +256,7 @@ func parse(input io.Reader) (*Point, error) {
 
 有了刚刚的这个技术，我们的“ [流式接口 Fluent Interface](https://martinfowler.com/bliki/FluentInterface.html)”也就很容易处理了。如下所示：
 
-```
+```go
 package main
 
 import (
@@ -316,16 +316,16 @@ func main() {
 
 通常来说，我们会使用 `fmt.Errorf()` 来完成这个事，比如：
 
-```
+```go
 if err != nil {
    return fmt.Errorf("something failed: %v", err)
 }
 
 ```
 
-另外，在Go语言的开发者中，更为普遍的做法是将错误包装在另一个错误中，同时保留原始内容：
+另外，在 Go 语言的开发者中，更为普遍的做法是将错误包装在另一个错误中，同时保留原始内容：
 
-```
+```go
 type authorizationError struct {
     operation string
     err error   // original error
@@ -339,7 +339,7 @@ func (e *authorizationError) Error() string {
 
 当然，更好的方式是通过一种标准的访问方法，这样，我们最好使用一个接口，比如 `causer` 接口中实现 `Cause()` 方法来暴露原始错误，以供进一步检查：
 
-```
+```go
 type causer interface {
     Cause() error
 }
@@ -352,7 +352,7 @@ func (e *authorizationError) Cause() error {
 
 这里有个好消息是，这样的代码不必再写了，有一个第三方的 [错误库](http://github.com/pkg/errors)，对于这个库，我无论到哪儿都能看到它的存在，所以，这个基本上来说就是事实上的标准了。代码示例如下：
 
-```
+```go
 import "github.com/pkg/errors"
 
 //错误包装
